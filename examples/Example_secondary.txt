@@ -1,0 +1,27 @@
+// Example with bquest
+
+Quiz quiz = Quiz("myQuiz3")
+BQuest bq = import("examplesSecondary/Example1.txt")
+
+Table a = bq>>(questions)
+quiz<+(group, a)
+
+for group in quiz>>(groups) do
+	for q in group>>(questions) do
+
+    		output(q)	// Imprime questão
+    		Text respostaUser = input("Answer:") // Bloqueia até que o utilizador digite uma resposta
+    
+    		// q>>type>>name  - retorna o tipo da pergunta
+    		if not q>>(type)>>(name) == "Essay" do
+			if not q>>(type)>>(name) == "ShortAnswer" do
+				// Converte a resposta em texto (ex. "a") para um Number, a->0, b->1
+        			Number resposta = respostaUser::toNumber()
+    			end  
+    
+    			if respostaUser == q>>(type)>>(rightAnswer) do
+         			output("Resposta correta. Parabéns.")
+   			end
+		end
+	end
+end

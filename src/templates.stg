@@ -1,0 +1,203 @@
+typeValue ::= [
+"Number":"Double",
+"Integer":"Integer",
+"Double":"Double",
+"None":"void",
+"Text":"String",
+"Table":"ArrayList",
+"BQuest":"BQuest",
+"Quiz":"Quiz",
+"Question":"Question",
+"Type":"Type",
+"Boolean":"Boolean",
+"String":"String",
+"List":"ArrayList",
+"void":"void",
+"Group":"Group",
+"ArrayList":"ArrayList",
+"Difficulty":"Difficulty",
+"MultipleChoice":"MultipleChoice",
+"Essay":"Essay",
+"Matching":"Matching",
+"NumericAnswer":"NumericAnswer",
+"ShortAnswer":"ShortAnswer",
+"int":"Integer"
+]
+
+/**
+* MAIN
+*
+*/
+module(name, stat, bquest) ::= <<
+import classes.*;
+
+import java.util.Scanner;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.lang.Math;
+
+@SuppressWarnings("unchecked")
+public class <name> {
+    private static final Scanner sc = new Scanner(System.in);
+
+    public static void main(String[] args) {
+        <stats(stat)>
+
+        sc.close();
+    }
+}
+>>
+
+stats(stat) ::= <<
+<if(stat)><stat; separator="\n"><endif>
+>>
+
+
+decl(stat, type, var, expr) ::= <<
+<stats(stat)>
+<typeValue.(type)> <var><if(expr)> = <expr><endif>;
+>>
+
+// Used mainly for DeclAssign where the types may be parametrized. It's not used as a normal decl
+// ptype is the type's paramenter type, if it requires. An example (and maybe the only one) is the Table.
+pdecl(stat, type, var, expr, ptype) ::= <<
+<stats(stat)>
+<typeValue.(type)><if(ptype)>\<<typeValue.(ptype)>\><endif> <var><if(expr)> = <expr><endif>;
+>>
+
+bquestDecl(var, question) ::= <<
+BQuest <var> = new BQuest()
+<stats(question)>;
+>>
+
+question(typeName, keyword, option, content, theme, difficulty) ::= <<
+.add(new Question(
+    new <typeName>().setKeywords(Arrays.asList(<elements(keyword:string())>)).setOptions(Arrays.asList(<elements(keyword:string())>)),
+    <content>,
+    <theme>,
+    <difficulty>))
+>>
+
+/**
+* Assignments
+*
+*/
+assign(var, expr) ::= "<var> = <expr>;"
+
+cast(type, expr) ::= "(<typeValue.(type)>) <expr>"
+
+table(stat, type, var, elem) ::= <<
+<stats(stat)>
+ArrayList<if(type)>\<<typeValue.(type)>\><endif> <var> = new ArrayList(Arrays.asList(<elements(elem)>));
+>>
+
+elements(elem) ::= <<
+<if(elem)><elem; separator=","><endif>
+>>
+
+string(elem) ::= "\"<elem>\""
+
+//generalizar antes de passar para types?
+with_new(stat, type, var, elem) ::= <<
+<decl(stat, type, var, ["new ",type,"(", elements(elem), ")"])>
+>>
+
+/**
+* Unary operations
+*
+*/
+shuffle(stat, type, var, table) ::= <<
+<stats(stat)>
+ArrayList\<<type>\> <var> = new ArrayList\<>();
+<var>.addAll(<table>);
+Collections.shuffle(<var>);
+>>
+
+/**
+* Binary operations
+*
+*/
+binaryExpression(stat, type, var, e1, op, e2) ::= <<
+<decl(stat, type, var, [e1,op,e2])>
+>>
+
+typeBool ::= [
+"and":"&&",
+"or":"||"
+]
+
+boolExpression(stat, var, e1, op, e2) ::= <<
+<binaryExpression(stat, "Boolean", var, e1, typeBool.(op), e2)>
+>>
+
+typeLogic ::= [
+"==":"equals",
+"!=":"equals",
+"<":"compareTo",
+">":"compareTo",
+"<=":"compareTo",
+">=":"compareTo",
+"contains":"contains"
+]
+
+logicExpression(stat, var, e1, op, e2, extra) ::= <<
+<decl(stat, "Boolean", var, [e1, ".", typeLogic.(op), "(", e2, ")", extra])>
+>>
+
+parenthesis(expr) ::= "(<expr>)"
+
+power(stat, type, var, e1, e2) ::= <<
+<decl(stat, type, var, ["Math.pow(", e1, ",", e2, ")"])>
+>>
+
+/**
+* Input/Output
+*
+*/
+input(stat_before, decl_before, var, text) ::=<<
+<stats(stat_before)>
+System.out.print(<text>);
+<decl(decl_before, "Text", var, "sc.nextLine()")>
+>>
+
+output(text) ::= "System.out.println(<text>);"
+
+// Methods
+method(stat, var, args, id, type, final) ::= <<  <stats(stat)><var><type><if(id)><id><endif>(<elements(args)>)<if(final)>;<endif>
+>>
+
+converter(type)::=<<
+<typeValue.(type)>
+>>
+
+/**
+* Control flow
+*
+*/
+forIter(var, begin, end, stat) ::= <<
+for (int <var> = <begin>; <var> \< <end>; <var>++) {
+    <stats(stat)>
+}
+>>
+
+forEach(var, type, set, stat) ::= <<
+for (<typeValue.(type)> <var> : <set>) {
+    <stats(stat)>
+}
+>>
+
+ifStat(logic, stat) ::= <<
+if (<logic>) {
+    <stats(stat)>
+}
+>>
+/*
+logic: '(' logic ')'                                                    #ParenthesisCond
+        | 'not' logic                                                   #NotCond
+        | logic op=('and'|'or') logic                                   #CondComp
+        | expr op=('=='|'!='|'<'|'>'|'<='|'>='|'contains') expr         #VarComp
+        ;
+*/
+notCond(logic) ::= "!(<logic>)"

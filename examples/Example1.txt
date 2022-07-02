@@ -1,0 +1,37 @@
+Quiz quiz = Quiz("myQuiz")
+
+Table t1 = {"Option1", "Option2", "Option3"}
+Table t2 = {"A", "B", "C"}
+
+Type q_mc1 = MultipleChoice(t1, 1) // Atributos: (opções de resposta, índice da resposta certa) - Índice começa em 0
+Type  q_m_1 = Matching(t1, t2, {1, 0, 2}) // Atributos: (opções da 1ªcoluna, opções da 2ªcoluna, correspondência entre indíces da 1ª e 2ª coluna)
+
+Question q1 = Question(q_mc1, "Escolhe a opção correta:", "Tema 1", 3)	// Atributos: (tipo de pergunta, enunciado, tema, dificuldade) - dificuldade [1-3]
+Question q2 = Question(q_m_1, "Associa as opções:", "Tema2", 2)	 	
+
+quiz <+ (question, q1) // Adicionar pergunta q1 ao grupo 0 (default)
+quiz <+ (question, q2) // Adicionar pergunta q2 ao grupo 0 (default)
+
+Table temp = q1>>(type)>>(options)
+temp<<(1, "NewOption1")	// Alterar a 1ª opção da pergunta q1
+q1>>(type)<<(options, temp)
+
+for group in Shuffle [quiz>>(groups)] do
+	for q in group>>(questions) do
+
+    		output(q)	// Imprime questão
+    		Text respostaUser = input("Answer:") // Bloqueia até que o utilizador digite uma resposta
+    
+    		// q>>type>>name  - retorna o tipo da pergunta
+    		if not q>>(type)>>(name) == "Essay" do
+			if not q>>(type)>>(name) == "ShortAnswer" do
+				// Converte a resposta em texto (ex. "a") para um Number, a->0, b->1
+        			Number resposta = respostaUser::toNumber()
+    			end  
+    
+    			if respostaUser == q>>(type)>>(rightAnswer) do
+         			output("Resposta correta. Parabéns.")
+   			end
+		end
+	end
+end

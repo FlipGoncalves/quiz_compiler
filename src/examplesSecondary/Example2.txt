@@ -1,0 +1,41 @@
+{
+    // Pergunta sobre Programação
+        {
+        tema "Programação"
+        enunciado "Em que port são passados os pacotes http?"
+        dificuldade 3
+        tipo "Numeric Answer"
+        palavras-chave [87]
+    }
+
+    // Pergunta sobre Matemática
+    {
+        tema "Matemática"
+        enunciado "Quando utilizamos o Teorema de Pitágoras?"
+        dificuldade 3
+        tipo "Short Answer"
+        palavras-chave ["calcular", "hipotenusa"]
+    }
+
+    // Pergunta sobre Frutas
+    {
+        tema "TemaTeste"
+        enunciado "Qual destas frutas tem cor laranja?"
+        dificuldade 1
+        tipo "Multiple Choice"
+        palavras-chave ["Laranja"]
+        opcoes {"Laranja", "Banana", "Maçã"}
+    }
+
+    // Pergunta indefinida (comentada)
+    //(
+    {
+        tema "Indefinido"
+        enunciado "Indefinido"
+        dificuldade 1
+        tipo "Indefinido"
+        palavras-chave []
+        opcoes {}
+    }
+    )//
+}
